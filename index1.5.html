@@ -1,0 +1,2491 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="حلقات الفجر" />
+  <title>نظام تحضير حلقات ما بعد الفجر</title>
+
+  <style>
+    :root[data-theme="dark"] {
+      --bg-primary: #0B1120;
+      --bg-surface: #1E293B;
+      --bg-elevated: #283548;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --accent-gold: #F59E0B;
+      --accent-gold-soft: rgba(245, 158, 11, 0.15);
+      --present-green: #10B981;
+      --present-soft: rgba(16, 185, 129, 0.16);
+      --excused-amber: #F59E0B;
+      --excused-soft: rgba(245, 158, 11, 0.18);
+      --unexcused-red: #EF4444;
+      --unexcused-soft: rgba(239, 68, 68, 0.16);
+      --border-color: rgba(148, 163, 184, 0.18);
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    :root[data-theme="light"] {
+      --bg-primary: #F1F5F9;
+      --bg-surface: #FFFFFF;
+      --bg-elevated: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --accent-gold: #D97706;
+      --accent-gold-soft: rgba(217, 119, 6, 0.12);
+      --present-green: #059669;
+      --present-soft: rgba(5, 150, 105, 0.14);
+      --excused-amber: #D97706;
+      --excused-soft: rgba(217, 119, 6, 0.15);
+      --unexcused-red: #DC2626;
+      --unexcused-soft: rgba(220, 38, 38, 0.13);
+      --border-color: rgba(15, 23, 42, 0.12);
+      --shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 140px;
+      transition: background-color 0.25s, color 0.25s;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .app-header {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      color: #F8FAFC;
+      padding: 15px 18px;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .header-title h1 {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: #F8FAFC;
+    }
+
+    .header-title p {
+      font-size: 0.76rem;
+      color: #CBD5E1;
+      margin-top: 3px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #F8FAFC;
+      height: 38px;
+      padding: 0 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .tab-view {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .tab-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--accent-gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Supervisor Alert Banner for Missing Past Attendance */
+    .supervisor-alert-banner {
+      background: var(--unexcused-soft);
+      border: 1.5px solid var(--unexcused-red);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+
+    .supervisor-alert-banner h4 {
+      color: var(--unexcused-red);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .missing-day-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    /* Calendar Strip */
+    .calendar-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .month-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .month-nav input[type="date"] {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .days-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .days-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .day-chip {
+      min-width: 60px;
+      padding: 8px 6px;
+      border-radius: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      text-align: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: 0.15s;
+      position: relative;
+    }
+
+    .day-chip.is-scheduled {
+      border-color: rgba(16, 185, 129, 0.45);
+    }
+
+    .day-chip.is-future {
+      opacity: 0.5;
+    }
+
+    .day-chip.has-missing::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--unexcused-red);
+    }
+
+    .day-chip.active {
+      background: var(--accent-gold);
+      color: #0F172A;
+      font-weight: 800;
+      border-color: var(--accent-gold);
+      opacity: 1;
+    }
+
+    .day-chip .d-name {
+      font-size: 0.72rem;
+      display: block;
+      opacity: 0.85;
+    }
+
+    .day-chip .d-num {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* Buttons */
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-emerald {
+      background: var(--present-green);
+      color: #FFFFFF;
+      flex: 1;
+    }
+
+    .btn-gold {
+      background: var(--accent-gold);
+      color: #0F172A;
+    }
+
+    .btn-outline {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-outline.active {
+      background: var(--accent-gold);
+      color: #0F172A;
+      border-color: var(--accent-gold);
+    }
+
+    .btn-danger {
+      background: var(--unexcused-soft);
+      color: var(--unexcused-red);
+      border: 1px solid var(--unexcused-red);
+    }
+
+    /* Student Attendance Card */
+    .student-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .student-item.status-PRESENT {
+      border-right: 4px solid var(--present-green);
+    }
+
+    .student-item.status-EXCUSED {
+      border-right: 4px solid var(--excused-amber);
+    }
+
+    .student-item.status-UNEXCUSED {
+      border-right: 4px solid var(--unexcused-red);
+    }
+
+    .student-item.status-UNMARKED {
+      border-right: 4px dashed var(--excused-amber);
+    }
+
+    .student-info {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .student-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .student-sub {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .excuse-pill {
+      display: inline-block;
+      background: var(--excused-soft);
+      color: var(--excused-amber);
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .alert-badge {
+      background: var(--unexcused-soft);
+      color: var(--unexcused-red);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .unmarked-badge {
+      background: var(--excused-soft);
+      color: var(--excused-amber);
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    /* 3-State Toggle Buttons */
+    .toggle-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .state-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      font-size: 1.15rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .state-btn.present.selected {
+      background: var(--present-green);
+      color: #FFFFFF;
+      border-color: var(--present-green);
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+    }
+
+    .state-btn.excused.selected {
+      background: var(--excused-amber);
+      color: #0F172A;
+      border-color: var(--excused-amber);
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
+    }
+
+    .state-btn.unexcused.selected {
+      background: var(--unexcused-red);
+      color: #FFFFFF;
+      border-color: var(--unexcused-red);
+      box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Sticky Summary Footer */
+    .summary-strip {
+      position: fixed;
+      bottom: 66px;
+      right: 0;
+      left: 0;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
+      padding: 8px 14px;
+      z-index: 40;
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.8rem;
+      font-weight: 700;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      height: 66px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 8px 0;
+      cursor: pointer;
+      border: none;
+      background: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-item.active {
+      color: var(--accent-gold);
+    }
+
+    .nav-item .icon {
+      font-size: 1.25rem;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .weekdays-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .day-check {
+      padding: 8px;
+      border-radius: 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      text-align: center;
+      font-size: 0.82rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .day-check.checked {
+      background: var(--present-soft);
+      border-color: var(--present-green);
+      color: var(--present-green);
+      font-weight: 700;
+    }
+
+    /* Modals / Bottom Sheets */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .bottom-sheet {
+      background: var(--bg-surface);
+      width: 100%;
+      max-width: 650px;
+      border-radius: 22px 22px 0 0;
+      padding: 20px 16px;
+      border-top: 2px solid var(--accent-gold);
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .chips-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .chip-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--excused-soft);
+      color: var(--excused-amber);
+      border: 1px solid var(--excused-amber);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 520px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-box {
+      background: var(--bg-elevated);
+      padding: 10px 8px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-box .val {
+      font-size: 1.25rem;
+      font-weight: 800;
+      display: block;
+    }
+
+    .stat-box .lbl {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      display: block;
+    }
+
+    .notice-box {
+      padding: 18px;
+      border-radius: 14px;
+      text-align: center;
+      background: var(--bg-elevated);
+      border: 1px dashed var(--accent-gold);
+      margin: 14px 0;
+    }
+
+    /* Official Report Pages (Page 1 Portrait + Page 2 Landscape) */
+    .report-page {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .report-official-header {
+      border-bottom: 2px solid var(--accent-gold);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .report-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+      background: var(--bg-elevated);
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+    }
+
+    .report-table-wrap {
+      overflow-x: auto;
+      margin-bottom: 14px;
+    }
+
+    table.official-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    table.official-table th,
+    table.official-table td {
+      padding: 8px 6px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    table.official-table th {
+      background: var(--bg-elevated);
+      color: var(--accent-gold);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    table.official-table td.name-cell {
+      text-align: right;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    table.official-table tr.exceeded-row {
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .cell-p { color: var(--present-green); font-weight: 800; }
+    .cell-e { color: var(--excused-amber); font-weight: 800; }
+    .cell-u { color: var(--unexcused-red); font-weight: 800; }
+
+    /* =========================================================
+       PRINT / OFFICIAL PDF STYLING
+       Page 1: Portrait (البيانات والنسب والجدول العام)
+       Page 2: Landscape (سجل التحضير التفصيلي خلال الفترة)
+       ========================================================= */
+    @page {
+      size: A4 portrait;
+      margin: 10mm;
+    }
+
+    @page landscape-matrix-page {
+      size: A4 landscape;
+      margin: 8mm;
+    }
+
+    @media print {
+      :root, :root[data-theme="dark"], :root[data-theme="light"] {
+        --bg-primary: #FFFFFF !important;
+        --bg-surface: #FFFFFF !important;
+        --bg-elevated: #F8FAFC !important;
+        --text-primary: #0F172A !important;
+        --text-secondary: #334155 !important;
+        --border-color: #94A3B8 !important;
+        --accent-gold: #0F172A !important;
+        --present-green: #047857 !important;
+        --excused-amber: #B45309 !important;
+        --unexcused-red: #B91C1C !important;
+      }
+
+      body {
+        background: #FFFFFF !important;
+        color: #0F172A !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 10.5pt;
+      }
+
+      .app-header,
+      .bottom-nav,
+      .summary-strip,
+      .no-print {
+        display: none !important;
+      }
+
+      .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .tab-view {
+        display: none !important;
+      }
+
+      #tab-reports {
+        display: block !important;
+      }
+
+      .report-page {
+        border: 1.5px solid #0F172A !important;
+        border-radius: 6px !important;
+        padding: 12px !important;
+        box-shadow: none !important;
+        margin-bottom: 0 !important;
+      }
+
+      /* الصفحة الأولى: عمودية (Portrait) */
+      .report-page-portrait {
+        page: auto;
+        break-after: page;
+        page-break-after: always;
+      }
+
+      /* الصفحة الثانية: أفقية (Landscape) لسجل التحضير التفصيلي */
+      .report-page-landscape {
+        page: landscape-matrix-page;
+        break-before: page;
+        page-break-before: always;
+        width: 100% !important;
+      }
+
+      .report-official-header {
+        border-bottom: 2px solid #0F172A !important;
+      }
+
+      .report-meta-grid,
+      .stat-box {
+        border: 1px solid #CBD5E1 !important;
+        background: #F8FAFC !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      table.official-table th {
+        background: #E2E8F0 !important;
+        color: #0F172A !important;
+        border: 1px solid #64748B !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      table.official-table td {
+        border: 1px solid #94A3B8 !important;
+      }
+
+      /* ضبط أبعاد جدول المصفوفة في الصفحة الثانية الأفقية ليتسع لأسبوعين أو شهر */
+      .report-page-landscape table.official-table {
+        font-size: 8.5pt !important;
+      }
+
+      .report-page-landscape table.official-table th,
+      .report-page-landscape table.official-table td {
+        padding: 5px 3px !important;
+      }
+
+      table.official-table tr.exceeded-row {
+        background: #FEE2E2 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .alert-badge {
+        border: 1px solid #B91C1C !important;
+        background: #FEE2E2 !important;
+        color: #B91C1C !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-title">
+      <h1 id="headerCircleName">🌅 حلقة ما بعد الفجر</h1>
+      <p id="headerSubInfo">المشرف: غير محدد | السنة: 1448 هـ</p>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="installPwaBtn" style="display:none;" onclick="installPWA()">📲 تثبيت</button>
+      <button class="icon-btn" onclick="toggleTheme()" title="تبديل المظهر" id="themeToggleBtn">☀️</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- TAB 1: DAILY ATTENDANCE -->
+    <section id="tab-attendance" class="tab-view active">
+      <!-- Supervisor Alert for Past Unmarked Students -->
+      <div id="missingPastAttendanceBanner"></div>
+
+      <div class="card calendar-bar">
+        <div class="month-nav">
+          <button class="btn btn-outline" onclick="shiftDate(-1)">▶ السابق</button>
+          <input type="date" id="attendanceDateInput" onchange="onDateInputChange(this.value)" />
+          <button class="btn btn-outline" onclick="shiftDate(1)">التالي ◀</button>
+        </div>
+        <div class="days-strip" id="daysStrip"></div>
+      </div>
+
+      <!-- Actions Bar -->
+      <div class="actions-row" id="sessionActionsRow">
+        <button class="btn btn-emerald" id="btnMarkAllPresent" onclick="markAllPresent()">✓ تحضير الكل كـ حاضر</button>
+        <button class="btn btn-outline" id="btnToggleHoliday" onclick="openHolidayModal()">🛑 تعطيل استثنائي</button>
+        <button class="btn btn-gold" id="btnCopyWhatsapp" onclick="copyDailyWhatsApp()">📋 نسخ للواتساب</button>
+      </div>
+
+      <!-- Dynamic Attendance Container -->
+      <div id="attendanceListContainer"></div>
+    </section>
+
+    <!-- TAB 2: STUDENTS MANAGEMENT -->
+    <section id="tab-students" class="tab-view">
+      <div class="card">
+        <div class="section-title">
+          <span>إضافة طالب جديد للحلقة</span>
+        </div>
+        <div class="form-group">
+          <label>الاسم الرباعي للطالب</label>
+          <input type="text" id="newStudentName" class="form-input" placeholder="مثال: شعيب عبدالقادر محمد باشعيب" />
+        </div>
+        <div class="form-group">
+          <label>ملاحظات عامة (اختياري)</label>
+          <input type="text" id="newStudentNotes" class="form-input" placeholder="مثال: يحفظ في جزء تبارك / منتظم..." />
+        </div>
+        <button class="btn btn-emerald" style="width:100%" onclick="addStudent()">+ إضافة الطالب للحلقة</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <span>قائمة طلاب الحلقة</span>
+          <span id="studentsCountBadge" style="font-size:0.8rem; color:var(--text-secondary)"></span>
+        </div>
+        <div class="actions-row">
+          <input type="text" id="studentSearchInput" class="form-input" placeholder="🔍 ابحث باسم الطالب..." oninput="renderStudentsList()" style="flex:2" />
+          <select id="studentFilterSelect" class="form-input" onchange="renderStudentsList()" style="flex:1">
+            <option value="active">النشطون</option>
+            <option value="exceeded">متجاوزو الغياب الأسبوعي</option>
+            <option value="archived">المؤرشفون</option>
+            <option value="all">الكل</option>
+          </select>
+        </div>
+        <div id="studentsManagementList"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: REPORTS & OFFICIAL ADMIN EXPORT -->
+    <section id="tab-reports" class="tab-view">
+      <!-- Report Controls (Hidden in Print) -->
+      <div class="card no-print">
+        <div class="section-title">
+          <span>إعداد التقرير الإداري والفترة الزمنية</span>
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-outline period-btn active" id="period-week" onclick="setReportPeriod('week')" style="flex:1">أسبوع</button>
+          <button class="btn btn-outline period-btn" id="period-twoweeks" onclick="setReportPeriod('twoweeks')" style="flex:1">أسبوعين</button>
+          <button class="btn btn-outline period-btn" id="period-month" onclick="setReportPeriod('month')" style="flex:1">شهر</button>
+          <button class="btn btn-outline period-btn" id="period-year" onclick="setReportPeriod('year')" style="flex:1">سنة</button>
+        </div>
+
+        <div class="actions-row" style="align-items:center; margin-top:6px;">
+          <div style="flex:1; min-width:135px;">
+            <label style="font-size:0.74rem; color:var(--text-secondary); display:block; margin-bottom:3px;">من تاريخ:</label>
+            <input type="date" id="reportStartDate" class="form-input" onchange="renderReports()" />
+          </div>
+          <div style="flex:1; min-width:135px;">
+            <label style="font-size:0.74rem; color:var(--text-secondary); display:block; margin-bottom:3px;">إلى تاريخ:</label>
+            <input type="date" id="reportEndDate" class="form-input" onchange="renderReports()" />
+          </div>
+        </div>
+
+        <div class="actions-row" id="reportExportButtonsRow" style="margin-top:10px; margin-bottom:0;">
+          <button class="btn btn-gold" style="flex:2" onclick="handlePrintOfficialReport()">🖨️ طباعة / حفظ PDF رسمي للإدارة</button>
+          <button class="btn btn-emerald" style="flex:1" onclick="exportCSV()">📥 تصدير Excel</button>
+        </div>
+      </div>
+
+      <!-- Incomplete Period Blocker Alert (Shown if any scheduled day in period is missing attendance) -->
+      <div id="reportIncompleteBlocker" class="no-print" style="display:none;"></div>
+
+      <!-- OFFICIAL PRINTABLE REPORT wrapper -->
+      <div id="officialReportWrapper">
+
+        <!-- PAGE 1 (PORTRAIT / عمودي): معلومات الحلقة + الإحصائيات + الجدول العام + الأعذار -->
+        <div class="report-page report-page-portrait">
+          <div class="report-official-header">
+            <div>
+              <div style="font-size:0.78rem; color:var(--text-secondary); font-weight:700;">بسم الله الرحمن الرحيم</div>
+              <h2 style="font-size:1.15rem; font-weight:800; margin-top:2px;">تقرير متابعة الحضور والانضباط - حلقات ما بعد الفجر</h2>
+              <div style="font-size:0.84rem; color:var(--accent-gold); font-weight:700; margin-top:3px;" id="repPeriodBadge">التقرير الأسبوعي</div>
+            </div>
+            <div style="text-align:left; font-size:0.78rem; color:var(--text-secondary);">
+              <div>تاريخ الاستخراج: <strong id="repIssueDate" style="color:var(--text-primary)"></strong></div>
+              <div>حد تنبيه الغياب: <strong id="repLimitInfo" style="color:var(--unexcused-red)"></strong></div>
+            </div>
+          </div>
+
+          <!-- Circle & Period Metadata -->
+          <div class="report-meta-grid" id="repMetaGrid"></div>
+
+          <!-- KPIs Summary Grid -->
+          <div class="stats-grid" id="overallStatsGrid"></div>
+
+          <!-- 1. Student Summary Table -->
+          <div class="section-title" style="margin-top:8px;">
+            <span>أولاً: البيان الإحصائي العام للطلاب خلال الفترة</span>
+            <span class="no-print" style="font-size:0.74rem; color:var(--text-secondary); font-weight:normal;">(اضغط على اسم الطالب لعرض ملفه)</span>
+          </div>
+          <div class="report-table-wrap">
+            <table class="official-table">
+              <thead>
+                <tr>
+                  <th style="width:32px">#</th>
+                  <th style="text-align:right">اسم الطالب</th>
+                  <th>أيام الحضور (✓)</th>
+                  <th>غياب بعذر (غ)</th>
+                  <th>غياب بدون عذر (✗)</th>
+                  <th>نسبة الالتزام</th>
+                  <th>حالة الانضباط (الحد الأسبوعي)</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Recorded Excuses Log in Period -->
+          <div id="periodExcusesContainer" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- PAGE 2 (LANDSCAPE / أفقي): مخصصة بالكامل لسجل التحضير التفصيلي خلال الفترة -->
+        <div class="report-page report-page-landscape">
+          <div class="report-official-header" style="margin-bottom:10px; padding-bottom:8px;">
+            <div>
+              <h3 style="font-size:1.02rem; font-weight:800;" id="page2LandscapeTitle">ثانياً: سجل التحضير التفصيلي خلال الفترة</h3>
+              <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;" id="page2LandscapeSub"></div>
+            </div>
+            <div style="font-size:0.76rem; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <span class="cell-p">✓ حاضر</span>
+              <span class="cell-e">غ غائب بعذر</span>
+              <span class="cell-u">✗ غائب بدون عذر</span>
+              <span class="alert-badge">⚠️ متجاوز للحد الأسبوعي</span>
+            </div>
+          </div>
+
+          <div class="report-table-wrap" id="detailedMatrixContainer" style="margin-bottom:0;"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: SETTINGS & BACKUP -->
+    <section id="tab-settings" class="tab-view">
+      <div class="card">
+        <div class="section-title">إعدادات الحلقة والجدول الأسبوعي</div>
+        <div class="form-group">
+          <label>اسم الحلقة</label>
+          <input type="text" id="setCircleName" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>اسم المشرف</label>
+          <input type="text" id="setSupervisor" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>العام الدراسي / الهجري أو الميلادي</label>
+          <input type="text" id="setYear" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>تاريخ بدء متابعة تحضير الحلقة (للتنبيه عن الأيام السابقة غير المحضّرة)</label>
+          <input type="date" id="setTrackingStartDate" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>حد التنبيه للغياب بدون عذر (عدد المرات في الأسبوع الواحد)</label>
+          <input type="number" id="setAbsenceLimit" class="form-input" min="1" max="7" />
+        </div>
+        <div class="form-group">
+          <label>أيام انعقاد الحلقة في الأسبوع</label>
+          <div class="weekdays-grid" id="weekdaysSelector"></div>
+        </div>
+        <button class="btn btn-emerald" style="width:100%" onclick="saveSettings()">💾 حفظ إعدادات الحلقة</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">النسخ الاحتياطي المحلي (بيانات السنة كاملة)</div>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px;">
+          جميع البيانات تُحفظ محلياً في الهاتف لمدة سنة كاملة. يمكنك تصدير نسخة احتياطية لحفظها أو نقلها لهاتف آخر.
+        </p>
+        <div class="actions-row">
+          <button class="btn btn-gold" style="flex:1" onclick="exportBackupJSON()">📤 تصدير نسخة (JSON)</button>
+          <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('restoreFileInput').click()">📥 استعادة نسخة</button>
+          <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="importBackupJSON(event)" />
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Live Sticky Summary Bar -->
+  <div class="summary-strip" id="dailySummaryStrip">
+    <div class="sum-item">الطلاب: <span id="sumTotal">0</span></div>
+    <div class="sum-item" style="color:var(--present-green)">حاضر ✓: <span id="sumPresent">0</span></div>
+    <div class="sum-item" style="color:var(--excused-amber)">بعذر غ: <span id="sumExcused">0</span></div>
+    <div class="sum-item" style="color:var(--unexcused-red)">غياب ✗: <span id="sumUnexcused">0</span></div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="navBtn-attendance" onclick="switchTab('attendance', this)">
+      <span class="icon">☑️</span>
+      <span>التحضير</span>
+    </button>
+    <button class="nav-item" id="navBtn-students" onclick="switchTab('students', this)">
+      <span class="icon">👥</span>
+      <span>الطلاب</span>
+    </button>
+    <button class="nav-item" id="navBtn-reports" onclick="switchTab('reports', this)">
+      <span class="icon">📊</span>
+      <span>التقارير</span>
+    </button>
+    <button class="nav-item" id="navBtn-settings" onclick="switchTab('settings', this)">
+      <span class="icon">⚙️</span>
+      <span>الإعدادات</span>
+    </button>
+  </nav>
+
+  <!-- MODAL 1: EXCUSE BOTTOM SHEET -->
+  <div class="modal-overlay" id="excuseModal">
+    <div class="bottom-sheet">
+      <div class="section-title">
+        <span id="excuseModalStudentName">تسجيل عذر غياب (غ)</span>
+        <button class="btn btn-outline" onclick="closeModal('excuseModal')">✕</button>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:10px;">اختر عذراً سريعاً بضغطة واحدة أو اكتب سبب الغياب:</p>
+      <div class="chips-row">
+        <button class="chip-btn" onclick="selectQuickExcuse('مرض')">🤒 مرض</button>
+        <button class="chip-btn" onclick="selectQuickExcuse('سفر')">✈️ سفر</button>
+        <button class="chip-btn" onclick="selectQuickExcuse('خارج السكن')">🏠 خارج السكن</button>
+      </div>
+      <div class="form-group">
+        <input type="text" id="excuseReasonInput" class="form-input" placeholder="أو اكتب تفصيل العذر هنا..." />
+      </div>
+      <button class="btn btn-emerald" style="width:100%" onclick="confirmExcuse()">حفظ العذر (غ)</button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: STUDENT PROFILE & EDIT -->
+  <div class="modal-overlay" id="studentProfileModal">
+    <div class="bottom-sheet" id="studentProfileContent"></div>
+  </div>
+
+  <!-- MODAL 3: HOLIDAY / CANCEL SESSION -->
+  <div class="modal-overlay" id="holidayModal">
+    <div class="bottom-sheet">
+      <div class="section-title">
+        <span>تعطيل الحلقة استثنائياً هذا اليوم</span>
+        <button class="btn btn-outline" onclick="closeModal('holidayModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label>سبب التعطيل / الإجازة</label>
+        <input type="text" id="holidayReasonInput" class="form-input" placeholder="مثال: إجازة رسمية، اختبارات، أمطار..." />
+      </div>
+      <button class="btn btn-danger" style="width:100%" onclick="confirmToggleHoliday()">تأكيد تعطيل هذا اليوم</button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       1. PWA MANIFEST & SERVICE WORKER SETUP
+       ========================================================= */
+    let deferredInstallPrompt = null;
+
+    function setupPWA() {
+      const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#0F172A"/><circle cx="256" cy="230" r="110" fill="#F59E0B"/><path d="M96 360 Q256 290 416 360 L416 430 L96 430 Z" fill="#10B981"/></svg>`;
+      const iconUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(iconSvg);
+
+      const manifest = {
+        name: 'نظام تحضير حلقات ما بعد الفجر',
+        short_name: 'حلقات الفجر',
+        description: 'إدارة وتوثيق الحضور والغياب لحلقات ما بعد الفجر على مدار السنة',
+        start_url: './',
+        display: 'standalone',
+        background_color: '#0F172A',
+        theme_color: '#0F172A',
+        lang: 'ar',
+        dir: 'rtl',
+        icons: [
+          { src: iconUrl, sizes: '192x192', type: 'image/svg+xml' },
+          { src: iconUrl, sizes: '512x512', type: 'image/svg+xml' }
+        ]
+      };
+
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = URL.createObjectURL(manifestBlob);
+      document.head.appendChild(manifestLink);
+
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+        const swCode = `
+          const CACHE_NAME = 'fajr-pwa-cache-v3';
+          self.addEventListener('install', e => self.skipWaiting());
+          self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+          self.addEventListener('fetch', e => {
+            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+          });
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        document.getElementById('installPwaBtn').style.display = 'inline-flex';
+      });
+    }
+
+    function installPWA() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(() => {
+        deferredInstallPrompt = null;
+        document.getElementById('installPwaBtn').style.display = 'none';
+      });
+    }
+
+    /* =========================================================
+       2. DATABASE ENGINE & DEFAULT STUDENTS
+       ========================================================= */
+    const DB_KEY = 'FAJR_CIRCLE_PWA_DB_V3';
+    const ARABIC_DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+    function getTodayISO() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now - offset).toISOString().split('T')[0];
+    }
+
+    function shiftISO(isoDate, deltaDays) {
+      const d = new Date(isoDate + 'T12:00:00');
+      d.setDate(d.getDate() + deltaDays);
+      return d.toISOString().split('T')[0];
+    }
+
+    let db = {
+      settings: {
+        circle_name: 'حلقة ما بعد الفجر',
+        supervisor_name: 'مشرف الحلقة',
+        current_year: '1448 هـ - 2026 م',
+        active_days: [0, 1, 2, 3, 4], // الأحد إلى الخميس
+        weekly_absence_limit: 2,      // حد الغياب بدون عذر في الأسبوع
+        tracking_start_date: shiftISO(getTodayISO(), -6), // بداية الأسبوع الحالي افتراضياً
+        theme: 'dark'
+      },
+      students: [],
+      sessions: [],
+      records: []
+    };
+
+    let currentSelectedDate = getTodayISO();
+    let currentExcuseStudentId = null;
+    let currentReportPeriod = 'week';
+
+    function loadDB() {
+      const raw = localStorage.getItem(DB_KEY) || localStorage.getItem('FAJR_CIRCLE_PWA_DB_V2');
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          db = {
+            ...db,
+            ...parsed,
+            settings: { ...db.settings, ...(parsed.settings || {}) }
+          };
+          if (!db.settings.tracking_start_date) {
+            db.settings.tracking_start_date = shiftISO(getTodayISO(), -6);
+          }
+        } catch (e) {
+          console.error('Database parse error:', e);
+        }
+      } else {
+        // الأسماء الافتراضية المعتمدة بالترتيب المطلوب
+        const defaultJoin = shiftISO(getTodayISO(), -6);
+        db.students = [
+          { id: 'st_1', name: 'شعيب عبدالقادر محمد باشعيب', join_date: defaultJoin, is_active: true, notes: '' },
+          { id: 'st_2', name: 'لقمان فيصل عبدالله التميمي', join_date: defaultJoin, is_active: true, notes: '' },
+          { id: 'st_3', name: 'حسن خالد حيمد بارفيد', join_date: defaultJoin, is_active: true, notes: '' }
+        ];
+        saveDB();
+      }
+      applyTheme(db.settings.theme);
+      updateHeaderUI();
+    }
+
+    function saveDB() {
+      localStorage.setItem(DB_KEY, JSON.stringify(db));
+      updateHeaderUI();
+    }
+
+    function updateHeaderUI() {
+      document.getElementById('headerCircleName').textContent = '🌅 ' + db.settings.circle_name;
+      document.getElementById('headerSubInfo').textContent = `المشرف: ${db.settings.supervisor_name} | العام: ${db.settings.current_year}`;
+    }
+
+    function toggleTheme() {
+      const next = db.settings.theme === 'dark' ? 'light' : 'dark';
+      db.settings.theme = next;
+      applyTheme(next);
+      saveDB();
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('themeToggleBtn').textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    /* =========================================================
+       3. MISSING ATTENDANCE ENGINE & WEEKLY LIMIT ENGINE
+       ========================================================= */
+    // إرجاع جميع أيام الحلقة المجدولة غير المعطلة في نطاق تاريخين [startISO, endISO]
+    function getScheduledActiveDatesInRange(startISO, endISO) {
+      const dates = [];
+      if (startISO > endISO) return dates;
+      let curr = startISO;
+      while (curr <= endISO) {
+        const d = new Date(curr + 'T12:00:00');
+        if (db.settings.active_days.includes(d.getDay())) {
+          const sess = db.sessions.find(s => s.date === curr);
+          if (!sess || !sess.is_cancelled) {
+            dates.push(curr);
+          }
+        }
+        curr = shiftISO(curr, 1);
+      }
+      return dates;
+    }
+
+    // فحص الأيام التي لم يكتمل فيها تحضير جميع الطلاب النشطين ضمن نطاق معين
+    function getIncompleteDaysInRange(startISO, endISO) {
+      const activeStudents = db.students.filter(s => s.is_active);
+      if (activeStudents.length === 0) return [];
+
+      const scheduledDates = getScheduledActiveDatesInRange(startISO, endISO);
+      const incompleteList = [];
+
+      scheduledDates.forEach(dateStr => {
+        const sessId = 'sess_' + dateStr;
+        const d = new Date(dateStr + 'T12:00:00');
+        const dayName = ARABIC_DAYS[d.getDay()];
+
+        const missingStudents = activeStudents.filter(st => {
+          const rec = db.records.find(r => r.session_id === sessId && r.student_id === st.id);
+          return !rec || !rec.status;
+        });
+
+        if (missingStudents.length > 0) {
+          incompleteList.push({
+            date: dateStr,
+            dayName: dayName,
+            missingStudents: missingStudents
+          });
+        }
+      });
+
+      return incompleteList;
+    }
+
+    // تنبيه المشرف في شاشة التحضير إذا مر يوم سابق ولم يُحضّر طالب معين
+    function renderSupervisorMissingPastAlert() {
+      const bannerEl = document.getElementById('missingPastAttendanceBanner');
+      const today = getTodayISO();
+      const yesterday = shiftISO(today, -1);
+      const startTrack = db.settings.tracking_start_date || shiftISO(today, -6);
+
+      if (startTrack > yesterday) {
+        bannerEl.innerHTML = '';
+        return;
+      }
+
+      const missingPast = getIncompleteDaysInRange(startTrack, yesterday);
+      if (missingPast.length === 0) {
+        bannerEl.innerHTML = '';
+        return;
+      }
+
+      const itemsHtml = missingPast.map(item => {
+        const names = item.missingStudents.map(s => s.name).join('، ');
+        return `
+          <div class="missing-day-item">
+            <div>
+              <strong>📅 ${item.dayName} (${item.date}):</strong>
+              <span style="color:var(--text-secondary); display:block; margin-top:2px;">
+                طلاب لم يُحضّروا (${item.missingStudents.length}): ${names}
+              </span>
+            </div>
+            <button class="btn btn-gold" style="padding:6px 10px; font-size:0.76rem; white-space:nowrap;" onclick="jumpToAttendanceDate('${item.date}')">
+              تحضير اليوم ◀
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      bannerEl.innerHTML = `
+        <div class="supervisor-alert-banner">
+          <h4>⚠️ تنبيه للمشرف: توجد أيام سابقة لم يكتمل فيها تحضير بعض الطلاب!</h4>
+          <p style="font-size:0.78rem; color:var(--text-secondary);">يرجى استكمال تحضير الطلاب في الأيام التالية لضمان دقة السجلات والتقارير:</p>
+          ${itemsHtml}
+        </div>
+      `;
+    }
+
+    function jumpToAttendanceDate(dateStr) {
+      currentSelectedDate = dateStr;
+      const navBtn = document.getElementById('navBtn-attendance');
+      switchTab('attendance', navBtn);
+    }
+
+    // حساب بداية ونهاية الأسبوع (الأحد -> السبت)
+    function getWeekBounds(refDateISO) {
+      const d = new Date(refDateISO + 'T12:00:00');
+      const dayOfWeek = d.getDay();
+      const sunday = new Date(d);
+      sunday.setDate(d.getDate() - dayOfWeek);
+      const saturday = new Date(sunday);
+      saturday.setDate(sunday.getDate() + 6);
+      return {
+        start: sunday.toISOString().split('T')[0],
+        end: saturday.toISOString().split('T')[0]
+      };
+    }
+
+    function getStudentWeeklyUnexcusedCount(studentId, refDateISO = currentSelectedDate) {
+      const bounds = getWeekBounds(refDateISO);
+      const cancelledIds = new Set(db.sessions.filter(s => s.is_cancelled).map(s => s.id));
+
+      return db.records.filter(r => {
+        if (r.student_id !== studentId || r.status !== 'UNEXCUSED') return false;
+        if (cancelledIds.has(r.session_id)) return false;
+        const recDate = r.session_id.replace('sess_', '');
+        return recDate >= bounds.start && recDate <= bounds.end;
+      }).length;
+    }
+
+    function checkStudentWeeklyBreachInPeriod(studentId, periodRecords) {
+      const limit = db.settings.weekly_absence_limit || 2;
+      const unexcusedRecs = periodRecords.filter(r => r.student_id === studentId && r.status === 'UNEXCUSED');
+
+      const weeksMap = {};
+      unexcusedRecs.forEach(r => {
+        const recDate = r.session_id.replace('sess_', '');
+        const weekStart = getWeekBounds(recDate).start;
+        weeksMap[weekStart] = (weeksMap[weekStart] || 0) + 1;
+      });
+
+      let maxInSingleWeek = 0;
+      let breachedWeeksCount = 0;
+      Object.values(weeksMap).forEach(count => {
+        if (count > maxInSingleWeek) maxInSingleWeek = count;
+        if (count >= limit) breachedWeeksCount++;
+      });
+
+      return {
+        exceeded: maxInSingleWeek >= limit,
+        maxInSingleWeek,
+        breachedWeeksCount
+      };
+    }
+
+    /* =========================================================
+       4. CALENDAR & DAILY ATTENDANCE ENGINE
+       ========================================================= */
+    function initAttendanceView() {
+      document.getElementById('attendanceDateInput').value = currentSelectedDate;
+      renderSupervisorMissingPastAlert();
+      renderDaysStrip();
+      renderAttendanceList();
+    }
+
+    function onDateInputChange(val) {
+      if (!val) return;
+      currentSelectedDate = val;
+      initAttendanceView();
+    }
+
+    function shiftDate(days) {
+      currentSelectedDate = shiftISO(currentSelectedDate, days);
+      initAttendanceView();
+    }
+
+    function renderDaysStrip() {
+      const strip = document.getElementById('daysStrip');
+      strip.innerHTML = '';
+      const centerDate = new Date(currentSelectedDate + 'T12:00:00');
+      const todayISO = getTodayISO();
+      const activeStudents = db.students.filter(s => s.is_active);
+
+      for (let i = -7; i <= 7; i++) {
+        const d = new Date(centerDate);
+        d.setDate(centerDate.getDate() + i);
+        const iso = d.toISOString().split('T')[0];
+        const dayIndex = d.getDay();
+        const isScheduled = db.settings.active_days.includes(dayIndex);
+        const isSelected = iso === currentSelectedDate;
+        const isFuture = iso > todayISO;
+
+        // Check if past scheduled day has missing records
+        let hasMissing = false;
+        if (isScheduled && iso < todayISO && activeStudents.length > 0) {
+          const sess = db.sessions.find(s => s.date === iso);
+          if (!sess || !sess.is_cancelled) {
+            const sessId = 'sess_' + iso;
+            hasMissing = activeStudents.some(st => !db.records.some(r => r.session_id === sessId && r.student_id === st.id));
+          }
+        }
+
+        const chip = document.createElement('div');
+        chip.className = `day-chip ${isScheduled ? 'is-scheduled' : ''} ${isFuture ? 'is-future' : ''} ${hasMissing ? 'has-missing' : ''} ${isSelected ? 'active' : ''}`;
+        chip.innerHTML = `
+          <span class="d-name">${ARABIC_DAYS[dayIndex]}</span>
+          <span class="d-num">${d.getDate()}/${d.getMonth() + 1}</span>
+        `;
+        chip.onclick = () => {
+          currentSelectedDate = iso;
+          initAttendanceView();
+        };
+        strip.appendChild(chip);
+
+        if (isSelected) {
+          setTimeout(() => chip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 50);
+        }
+      }
+    }
+
+    function getOrCreateSession(dateStr) {
+      let session = db.sessions.find(s => s.date === dateStr);
+      if (!session) {
+        session = {
+          id: 'sess_' + dateStr,
+          date: dateStr,
+          is_cancelled: false,
+          cancellation_reason: ''
+        };
+        db.sessions.push(session);
+        saveDB();
+      }
+      return session;
+    }
+
+    function renderAttendanceList() {
+      const container = document.getElementById('attendanceListContainer');
+      const todayISO = getTodayISO();
+      const d = new Date(currentSelectedDate + 'T12:00:00');
+      const dayOfWeek = d.getDay();
+      const isScheduledDay = db.settings.active_days.includes(dayOfWeek);
+      const session = db.sessions.find(s => s.date === currentSelectedDate);
+      const activeStudents = db.students.filter(s => s.is_active);
+
+      const btnHoliday = document.getElementById('btnToggleHoliday');
+      const btnAllPresent = document.getElementById('btnMarkAllPresent');
+      const btnCopyWhatsapp = document.getElementById('btnCopyWhatsapp');
+
+      // 1. منع التحضير ليوم لم يأتِ بعد (Future Date Prevention)
+      if (currentSelectedDate > todayISO) {
+        btnAllPresent.style.display = 'none';
+        btnHoliday.style.display = 'none';
+        btnCopyWhatsapp.style.display = 'none';
+        container.innerHTML = `
+          <div class="notice-box" style="border-color:var(--unexcused-red);">
+            <h3 style="color:var(--unexcused-red); margin-bottom:6px;">⏳ لا يُسمح بتحضير يوم لم يأتِ بعد</h3>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">
+              التاريخ المحدد (${currentSelectedDate}) هو تاريخ مستقبلي بعد تاريخ اليوم (${todayISO}).
+              <br>يمكنك فقط التحضير ليومنا الحالي أو استكمال الأيام السابقة.
+            </p>
+            <button class="btn btn-gold" style="margin-top:12px;" onclick="jumpToAttendanceDate('${todayISO}')">العودة إلى تاريخ اليوم</button>
+          </div>
+        `;
+        updateSummaryCounters(activeStudents.length, 0, 0, 0);
+        return;
+      }
+
+      btnCopyWhatsapp.style.display = 'inline-flex';
+
+      // 2. منع التحضير في غير أيام الحلقة المجدولة
+      if (!isScheduledDay) {
+        btnAllPresent.style.display = 'none';
+        btnHoliday.style.display = 'none';
+        container.innerHTML = `
+          <div class="notice-box">
+            <h3 style="color:var(--accent-gold); margin-bottom:6px;">⛔ اليوم (${ARABIC_DAYS[dayOfWeek]}) ليس من أيام الحلقة المجدولة</h3>
+            <p style="font-size:0.85rem; color:var(--text-secondary);">
+              أيام الانعقاد المحددة: ${db.settings.active_days.map(idx => ARABIC_DAYS[idx]).join('، ')}.
+            </p>
+          </div>
+        `;
+        updateSummaryCounters(activeStudents.length, 0, 0, 0);
+        return;
+      }
+
+      btnHoliday.style.display = 'inline-flex';
+
+      // 3. حالة اليوم المعطل استثنائياً
+      if (session && session.is_cancelled) {
+        btnAllPresent.style.display = 'none';
+        btnHoliday.textContent = '🔄 إلغاء التعطيل وفتح التحضير';
+        container.innerHTML = `
+          <div class="notice-box">
+            <h3 style="color:var(--unexcused-red); margin-bottom:6px;">🛑 الحلقة معطلة استثنائياً في هذا اليوم</h3>
+            <p style="font-size:0.88rem; color:var(--text-primary); font-weight:600;">
+              السبب: ${session.cancellation_reason || 'إجازة / ظرف طارئ'}
+            </p>
+            <p style="font-size:0.78rem; color:var(--text-secondary); margin-top:6px;">
+              هذا اليوم مستثنى ولا يؤثر على نسب التزام الطلاب.
+            </p>
+          </div>
+        `;
+        updateSummaryCounters(activeStudents.length, 0, 0, 0);
+        return;
+      }
+
+      btnAllPresent.style.display = 'inline-flex';
+      btnHoliday.textContent = '🛑 تعطيل استثنائي';
+
+      if (activeStudents.length === 0) {
+        container.innerHTML = `
+          <div class="notice-box">
+            <p>لا يوجد طلاب نشطون حالياً. أضف طلاباً من تبويب "الطلاب".</p>
+          </div>
+        `;
+        updateSummaryCounters(0, 0, 0, 0);
+        return;
+      }
+
+      const sessId = 'sess_' + currentSelectedDate;
+      let presentCount = 0, excusedCount = 0, unexcusedCount = 0;
+      const weeklyLimit = db.settings.weekly_absence_limit || 2;
+
+      container.innerHTML = activeStudents.map(student => {
+        const rec = db.records.find(r => r.session_id === sessId && r.student_id === student.id);
+        const status = rec ? rec.status : '';
+        if (status === 'PRESENT') presentCount++;
+        if (status === 'EXCUSED') excusedCount++;
+        if (status === 'UNEXCUSED') unexcusedCount++;
+
+        const weeklyUnexcused = getStudentWeeklyUnexcusedCount(student.id, currentSelectedDate);
+        const isOverWeeklyLimit = weeklyUnexcused >= weeklyLimit;
+
+        return `
+          <div class="student-item ${status ? 'status-' + status : 'status-UNMARKED'}">
+            <div class="student-info" onclick="openStudentProfile('${student.id}')">
+              <div class="student-name">
+                <span>${student.name}</span>
+                ${!status ? `<span class="unmarked-badge">⏳ لم يُحضّر</span>` : ''}
+                ${isOverWeeklyLimit ? `<span class="alert-badge">⚠️ تجاوز حد الأسبوع (${weeklyUnexcused}/${weeklyLimit})</span>` : ''}
+              </div>
+              ${student.notes ? `<div class="student-sub">${student.notes}</div>` : ''}
+              ${status === 'EXCUSED' && rec.excuse_reason ? `<div class="excuse-pill">العذر: ${rec.excuse_reason}</div>` : ''}
+            </div>
+            <div class="toggle-group">
+              <button class="state-btn present ${status === 'PRESENT' ? 'selected' : ''}" onclick="setAttendance('${student.id}', 'PRESENT')" title="حاضر">✓</button>
+              <button class="state-btn excused ${status === 'EXCUSED' ? 'selected' : ''}" onclick="openExcuseSheet('${student.id}')" title="غائب بعذر">غ</button>
+              <button class="state-btn unexcused ${status === 'UNEXCUSED' ? 'selected' : ''}" onclick="setAttendance('${student.id}', 'UNEXCUSED')" title="غائب بدون عذر">✗</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateSummaryCounters(activeStudents.length, presentCount, excusedCount, unexcusedCount);
+    }
+
+    function updateSummaryCounters(total, present, excused, unexcused) {
+      document.getElementById('sumTotal').textContent = total;
+      document.getElementById('sumPresent').textContent = present;
+      document.getElementById('sumExcused').textContent = excused;
+      document.getElementById('sumUnexcused').textContent = unexcused;
+    }
+
+    function setAttendance(studentId, status, excuseReason = '') {
+      if (currentSelectedDate > getTodayISO()) {
+        return alert('⏳ لا يُسمح بتحضير يوم لم يأتِ بعد.');
+      }
+
+      const session = getOrCreateSession(currentSelectedDate);
+      let rec = db.records.find(r => r.session_id === session.id && r.student_id === studentId);
+
+      if (!rec) {
+        rec = {
+          id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          session_id: session.id,
+          student_id: studentId,
+          status: status,
+          excuse_reason: excuseReason,
+          timestamp: new Date().toISOString()
+        };
+        db.records.push(rec);
+      } else {
+        rec.status = status;
+        rec.excuse_reason = status === 'EXCUSED' ? excuseReason : '';
+        rec.timestamp = new Date().toISOString();
+      }
+      saveDB();
+      initAttendanceView();
+    }
+
+    function markAllPresent() {
+      if (currentSelectedDate > getTodayISO()) {
+        return alert('⏳ لا يُسمح بتحضير يوم لم يأتِ بعد.');
+      }
+      const d = new Date(currentSelectedDate + 'T12:00:00');
+      if (!db.settings.active_days.includes(d.getDay())) return;
+
+      const session = getOrCreateSession(currentSelectedDate);
+      if (session.is_cancelled) return;
+
+      const activeStudents = db.students.filter(s => s.is_active);
+      activeStudents.forEach(st => {
+        let rec = db.records.find(r => r.session_id === session.id && r.student_id === st.id);
+        if (!rec) {
+          db.records.push({
+            id: 'rec_' + Date.now() + '_' + st.id,
+            session_id: session.id,
+            student_id: st.id,
+            status: 'PRESENT',
+            excuse_reason: '',
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          rec.status = 'PRESENT';
+          rec.excuse_reason = '';
+        }
+      });
+      saveDB();
+      initAttendanceView();
+    }
+
+    /* =========================================================
+       5. EXCUSE (مرض، سفر، خارج السكن) & HOLIDAY MODALS
+       ========================================================= */
+    function openExcuseSheet(studentId) {
+      if (currentSelectedDate > getTodayISO()) return;
+      currentExcuseStudentId = studentId;
+      const st = db.students.find(s => s.id === studentId);
+      const sessId = 'sess_' + currentSelectedDate;
+      const rec = db.records.find(r => r.session_id === sessId && r.student_id === studentId);
+
+      document.getElementById('excuseModalStudentName').textContent = `عذر غياب: ${st ? st.name : ''}`;
+      document.getElementById('excuseReasonInput').value = (rec && rec.excuse_reason) ? rec.excuse_reason : '';
+      document.getElementById('excuseModal').classList.add('open');
+    }
+
+    function selectQuickExcuse(reason) {
+      document.getElementById('excuseReasonInput').value = reason;
+      confirmExcuse();
+    }
+
+    function confirmExcuse() {
+      if (!currentExcuseStudentId) return;
+      const reason = document.getElementById('excuseReasonInput').value.trim() || 'عذر مسجل';
+      setAttendance(currentExcuseStudentId, 'EXCUSED', reason);
+      closeModal('excuseModal');
+    }
+
+    function openHolidayModal() {
+      if (currentSelectedDate > getTodayISO()) return;
+      const session = getOrCreateSession(currentSelectedDate);
+      if (session.is_cancelled) {
+        session.is_cancelled = false;
+        session.cancellation_reason = '';
+        saveDB();
+        initAttendanceView();
+        return;
+      }
+      document.getElementById('holidayReasonInput').value = '';
+      document.getElementById('holidayModal').classList.add('open');
+    }
+
+    function confirmToggleHoliday() {
+      const session = getOrCreateSession(currentSelectedDate);
+      session.is_cancelled = true;
+      session.cancellation_reason = document.getElementById('holidayReasonInput').value.trim() || 'إجازة / تعطيل استثنائي';
+      saveDB();
+      closeModal('holidayModal');
+      initAttendanceView();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    /* =========================================================
+       6. STUDENTS MANAGEMENT
+       ========================================================= */
+    function addStudent() {
+      const nameEl = document.getElementById('newStudentName');
+      const notesEl = document.getElementById('newStudentNotes');
+      const name = nameEl.value.trim();
+
+      if (!name) {
+        alert('يرجى إدخال الاسم الرباعي للطالب');
+        return;
+      }
+
+      db.students.push({
+        id: 'st_' + Date.now(),
+        name: name,
+        join_date: getTodayISO(),
+        is_active: true,
+        notes: notesEl.value.trim()
+      });
+
+      nameEl.value = '';
+      notesEl.value = '';
+      saveDB();
+      renderStudentsList();
+      initAttendanceView();
+    }
+
+    function renderStudentsList() {
+      const q = (document.getElementById('studentSearchInput').value || '').trim().toLowerCase();
+      const filter = document.getElementById('studentFilterSelect').value;
+      const listEl = document.getElementById('studentsManagementList');
+      const weeklyLimit = db.settings.weekly_absence_limit || 2;
+
+      const filtered = db.students.filter(s => {
+        const matchesName = s.name.toLowerCase().includes(q) || (s.notes || '').toLowerCase().includes(q);
+        if (!matchesName) return false;
+        const weeklyUnexcused = getStudentWeeklyUnexcusedCount(s.id, getTodayISO());
+        if (filter === 'active') return s.is_active;
+        if (filter === 'exceeded') return s.is_active && weeklyUnexcused >= weeklyLimit;
+        if (filter === 'archived') return !s.is_active;
+        return true;
+      });
+
+      document.getElementById('studentsCountBadge').textContent = `(${filtered.length} طالب)`;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<p style="text-align:center; color:var(--text-secondary); padding:14px;">لا توجد نتائج مطابقة</p>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(st => {
+        const weeklyUnexcused = getStudentWeeklyUnexcusedCount(st.id, getTodayISO());
+        const overLimit = weeklyUnexcused >= weeklyLimit;
+        return `
+          <div class="student-item">
+            <div class="student-info" onclick="openStudentProfile('${st.id}')">
+              <div class="student-name">
+                <span>${st.name}</span>
+                ${!st.is_active ? `<span class="alert-badge" style="background:var(--bg-elevated);color:var(--text-secondary)">مؤرشف</span>` : ''}
+                ${overLimit ? `<span class="alert-badge">⚠️ غياب هذا الأسبوع: ${weeklyUnexcused}/${weeklyLimit}</span>` : ''}
+              </div>
+              <div class="student-sub">تاريخ الانضمام: ${st.join_date} ${st.notes ? ' | ' + st.notes : ''}</div>
+            </div>
+            <div class="toggle-group">
+              <button class="btn btn-outline" onclick="openStudentProfile('${st.id}')">📄 ملف الطالب</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openStudentProfile(studentId) {
+      const st = db.students.find(s => s.id === studentId);
+      if (!st) return;
+
+      const cancelledIds = new Set(db.sessions.filter(s => s.is_cancelled).map(s => s.id));
+      const studentRecs = db.records.filter(r => r.student_id === st.id && !cancelledIds.has(r.session_id));
+
+      const todayISO = getTodayISO();
+      const currentMonthPrefix = todayISO.slice(0, 7);
+      const currentYearPrefix = todayISO.slice(0, 4);
+
+      const monthRecs = studentRecs.filter(r => r.session_id.replace('sess_', '').startsWith(currentMonthPrefix));
+      const yearRecs = studentRecs.filter(r => r.session_id.replace('sess_', '').startsWith(currentYearPrefix));
+
+      const calcRate = (arr) => {
+        if (arr.length === 0) return 100;
+        const p = arr.filter(r => r.status === 'PRESENT').length;
+        return Math.round((p / arr.length) * 100);
+      };
+
+      const presentTotal = studentRecs.filter(r => r.status === 'PRESENT').length;
+      const excusedRecs = studentRecs.filter(r => r.status === 'EXCUSED');
+      const weeklyUnexcused = getStudentWeeklyUnexcusedCount(st.id, todayISO);
+      const weeklyLimit = db.settings.weekly_absence_limit || 2;
+
+      const content = document.getElementById('studentProfileContent');
+      content.innerHTML = `
+        <div class="section-title">
+          <span>ملف إنجاز الطالب</span>
+          <button class="btn btn-outline" onclick="closeModal('studentProfileModal')">✕</button>
+        </div>
+
+        <div class="form-group">
+          <label>الاسم الرباعي</label>
+          <input type="text" id="editStName" class="form-input" value="${st.name}" />
+        </div>
+        <div class="form-group">
+          <label>ملاحظات عامة</label>
+          <input type="text" id="editStNotes" class="form-input" value="${st.notes || ''}" />
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="val" style="color:var(--present-green)">${calcRate(monthRecs)}%</span>
+            <span class="lbl">التزام الشهر</span>
+          </div>
+          <div class="stat-box">
+            <span class="val" style="color:var(--accent-gold)">${calcRate(yearRecs)}%</span>
+            <span class="lbl">التزام السنة</span>
+          </div>
+          <div class="stat-box">
+            <span class="val" style="color:var(--present-green)">${presentTotal}</span>
+            <span class="lbl">إجمالي الحضور (✓)</span>
+          </div>
+          <div class="stat-box">
+            <span class="val" style="color:var(--unexcused-red)">${weeklyUnexcused} / ${weeklyLimit}</span>
+            <span class="lbl">غياب هذا الأسبوع</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <h4 style="font-size:0.85rem; color:var(--excused-amber); margin-bottom:6px;">
+            سجل الغياب بعذر (${excusedRecs.length}):
+          </h4>
+          ${excusedRecs.length === 0
+            ? `<p style="font-size:0.78rem; color:var(--text-secondary);">لا يوجد غياب بعذر مسجل.</p>`
+            : excusedRecs.map(r => `<div class="excuse-pill" style="margin-left:6px;">📅 ${r.session_id.replace('sess_', '')}: ${r.excuse_reason || 'بعذر'}</div>`).join('')
+          }
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-emerald" onclick="saveStudentEdits('${st.id}')">💾 حفظ التعديلات</button>
+          <button class="btn btn-danger" onclick="toggleStudentArchive('${st.id}')">
+            ${st.is_active ? '📦 أرشفة الطالب' : '🔄 إعادة تفعيل'}
+          </button>
+        </div>
+      `;
+
+      document.getElementById('studentProfileModal').classList.add('open');
+    }
+
+    function saveStudentEdits(studentId) {
+      const st = db.students.find(s => s.id === studentId);
+      if (!st) return;
+      const newName = document.getElementById('editStName').value.trim();
+      if (!newName) return alert('الاسم لا يمكن أن يكون فارغاً');
+      st.name = newName;
+      st.notes = document.getElementById('editStNotes').value.trim();
+      saveDB();
+      closeModal('studentProfileModal');
+      renderStudentsList();
+      initAttendanceView();
+      renderReports();
+    }
+
+    function toggleStudentArchive(studentId) {
+      const st = db.students.find(s => s.id === studentId);
+      if (!st) return;
+      st.is_active = !st.is_active;
+      saveDB();
+      closeModal('studentProfileModal');
+      renderStudentsList();
+      initAttendanceView();
+    }
+
+    /* =========================================================
+       7. OFFICIAL REPORTS ENGINE WITH STRICT COMPLETION CHECK
+       ========================================================= */
+    function setReportPeriod(period) {
+      currentReportPeriod = period;
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById('period-' + period);
+      if (btn) btn.classList.add('active');
+
+      const endISO = getTodayISO();
+      let startISO = endISO;
+
+      if (period === 'week') {
+        startISO = shiftISO(endISO, -6); // أسبوع (7 أيام)
+      } else if (period === 'twoweeks') {
+        startISO = shiftISO(endISO, -13); // أسبوعين (14 يوماً)
+      } else if (period === 'month') {
+        startISO = shiftISO(endISO, -29); // شهر (30 يوماً)
+      } else if (period === 'year') {
+        startISO = shiftISO(endISO, -364); // سنة (365 يوماً)
+      }
+
+      document.getElementById('reportStartDate').value = startISO;
+      document.getElementById('reportEndDate').value = endISO;
+
+      renderReports();
+    }
+
+    function getReportRangeData() {
+      const todayISO = getTodayISO();
+      const startISO = document.getElementById('reportStartDate').value || shiftISO(todayISO, -6);
+      const endISO = document.getElementById('reportEndDate').value || todayISO;
+
+      const cancelledIds = new Set(db.sessions.filter(s => s.is_cancelled).map(s => s.id));
+      const scheduledDates = getScheduledActiveDatesInRange(startISO, endISO);
+      const incompleteDays = getIncompleteDaysInRange(startISO, endISO);
+      const hasFutureDays = endISO > todayISO;
+
+      const recs = db.records.filter(r => {
+        if (cancelledIds.has(r.session_id)) return false;
+        const dateStr = r.session_id.replace('sess_', '');
+        return dateStr >= startISO && dateStr <= endISO;
+      });
+
+      return { startISO, endISO, recs, scheduledDates, incompleteDays, hasFutureDays };
+    }
+
+    function renderReports() {
+      if (!document.getElementById('reportStartDate').value) {
+        setReportPeriod(currentReportPeriod);
+        return;
+      }
+
+      const { startISO, endISO, recs, scheduledDates, incompleteDays, hasFutureDays } = getReportRangeData();
+      const blockerEl = document.getElementById('reportIncompleteBlocker');
+      const reportWrapperEl = document.getElementById('officialReportWrapper');
+      const exportBtnsEl = document.getElementById('reportExportButtonsRow');
+
+      // التحقق الإلزامي: منع إصدار التقرير إذا تضمن تاريخاً مستقبلياً أو أياماً غير مكتملة التحضير لجميع الطلاب النشطين
+      if (hasFutureDays || incompleteDays.length > 0) {
+        reportWrapperEl.style.display = 'none';
+        exportBtnsEl.style.display = 'none';
+        blockerEl.style.display = 'block';
+
+        if (hasFutureDays) {
+          blockerEl.innerHTML = `
+            <div class="supervisor-alert-banner">
+              <h4>⛔ لا يمكن عمل تقرير لفترة تحتوي على أيام مستقبلية لم تأتِ بعد</h4>
+              <p style="font-size:0.82rem; color:var(--text-secondary);">
+                تاريخ نهاية التقرير المحدد (${endISO}) يتجاوز تاريخ اليوم (${getTodayISO()}). يرجى اختيار فترة تنتهي بتاريخ اليوم أو قبله.
+              </p>
+            </div>
+          `;
+          return;
+        }
+
+        const missingHtml = incompleteDays.map(item => {
+          const names = item.missingStudents.map(s => s.name).join('، ');
+          return `
+            <div class="missing-day-item">
+              <div>
+                <strong>📅 ${item.dayName} (${item.date})</strong>
+                <span style="color:var(--text-secondary); display:block; margin-top:2px;">
+                  ينقص تحضير (${item.missingStudents.length}) طالب: ${names}
+                </span>
+              </div>
+              <button class="btn btn-emerald" style="flex:0; white-space:nowrap; padding:7px 12px; font-size:0.78rem;" onclick="jumpToAttendanceDate('${item.date}')">
+                تحضير هذا اليوم ◀
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        blockerEl.innerHTML = `
+          <div class="supervisor-alert-banner">
+            <h4>⚠️ يجب استكمال التحضير أولاً قبل إصدار التقرير!</h4>
+            <p style="font-size:0.82rem; color:var(--text-primary); margin-bottom:8px;">
+              لإصدار التقرير الإداري للفترة من <strong>${startISO}</strong> إلى <strong>${endISO}</strong>، يجب أن تكون جميع أيام الحلقة في هذه الفترة محضّرة بالكامل لجميع الطلاب النشطين (أو تحويل اليوم إلى تعطيل استثنائي إن لم تنعقد الحلقة).
+            </p>
+            <p style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:6px;">
+              الأيام غير المكتملة في هذه الفترة (${incompleteDays.length} يوم):
+            </p>
+            ${missingHtml}
+          </div>
+        `;
+        return;
+      }
+
+      // في حال اكتمال التحضير لجميع أيام الفترة ولجميع الطلاب النشطين: فتح التقرير
+      blockerEl.style.display = 'none';
+      reportWrapperEl.style.display = 'block';
+      exportBtnsEl.style.display = 'flex';
+
+      const activeStudents = db.students.filter(s => s.is_active);
+      const weeklyLimit = db.settings.weekly_absence_limit || 2;
+
+      const periodLabels = {
+        week: 'التقرير الأسبوعي (لمدة أسبوع)',
+        twoweeks: 'تقرير نصف شهري (لمدة أسبوعين)',
+        month: 'التقرير الشهري (لمدة شهر)',
+        year: 'التقرير السنوي الشامل (لمدة سنة)'
+      };
+
+      const badgeText = periodLabels[currentReportPeriod] || 'تقرير فترة مخصصة';
+      document.getElementById('repPeriodBadge').textContent = badgeText;
+      document.getElementById('repIssueDate').textContent = getTodayISO();
+      document.getElementById('repLimitInfo').textContent = `${weeklyLimit} غياب بدون عذر / أسبوع`;
+
+      document.getElementById('repMetaGrid').innerHTML = `
+        <div><strong>اسم الحلقة:</strong> ${db.settings.circle_name}</div>
+        <div><strong>مشرف الحلقة:</strong> ${db.settings.supervisor_name}</div>
+        <div><strong>العام:</strong> ${db.settings.current_year}</div>
+        <div><strong>الفترة:</strong> من ${startISO} إلى ${endISO}</div>
+        <div><strong>أيام الانعقاد الفعلية:</strong> ${scheduledDates.length} يوم</div>
+        <div><strong>عدد الطلاب النشطين:</strong> ${activeStudents.length} طالب</div>
+      `;
+
+      // Page 2 Header Info
+      document.getElementById('page2LandscapeTitle').textContent = `ثانياً: سجل التحضير التفصيلي خلال الفترة (${badgeText})`;
+      document.getElementById('page2LandscapeSub').textContent = `الحلقة: ${db.settings.circle_name} | المشرف: ${db.settings.supervisor_name} | الفترة: من ${startISO} إلى ${endISO} (${scheduledDates.length} يوم انعقاد)`;
+
+      // KPIs
+      const totalP = recs.filter(r => r.status === 'PRESENT').length;
+      const totalE = recs.filter(r => r.status === 'EXCUSED').length;
+      const totalU = recs.filter(r => r.status === 'UNEXCUSED').length;
+      const overallRate = recs.length ? Math.round((totalP / recs.length) * 100) : 100;
+
+      let exceededStudentsCount = 0;
+      activeStudents.forEach(st => {
+        if (checkStudentWeeklyBreachInPeriod(st.id, recs).exceeded) exceededStudentsCount++;
+      });
+
+      document.getElementById('overallStatsGrid').innerHTML = `
+        <div class="stat-box">
+          <span class="val" style="color:var(--present-green)">${overallRate}%</span>
+          <span class="lbl">نسبة الحضور العامة</span>
+        </div>
+        <div class="stat-box">
+          <span class="val" style="color:var(--present-green)">${totalP}</span>
+          <span class="lbl">إجمالي الحضور (✓)</span>
+        </div>
+        <div class="stat-box">
+          <span class="val" style="color:var(--excused-amber)">${totalE}</span>
+          <span class="lbl">إجمالي الغياب بعذر (غ)</span>
+        </div>
+        <div class="stat-box">
+          <span class="val" style="color:var(--unexcused-red)">${totalU} (${exceededStudentsCount} متجاوز)</span>
+          <span class="lbl">بدون عذر (✗) | متجاوزو الحد</span>
+        </div>
+      `;
+
+      // Page 1: Student Summary Table
+      const tbody = document.getElementById('reportsTableBody');
+      tbody.innerHTML = activeStudents.map((st, idx) => {
+        const stRecs = recs.filter(r => r.student_id === st.id);
+        const p = stRecs.filter(r => r.status === 'PRESENT').length;
+        const e = stRecs.filter(r => r.status === 'EXCUSED').length;
+        const u = stRecs.filter(r => r.status === 'UNEXCUSED').length;
+        const rate = stRecs.length ? Math.round((p / stRecs.length) * 100) : 100;
+        const breach = checkStudentWeeklyBreachInPeriod(st.id, recs);
+
+        return `
+          <tr class="${breach.exceeded ? 'exceeded-row' : ''}" onclick="openStudentProfile('${st.id}')" style="cursor:pointer">
+            <td>${idx + 1}</td>
+            <td class="name-cell">${st.name}</td>
+            <td class="cell-p">${p}</td>
+            <td class="cell-e">${e}</td>
+            <td class="cell-u">${u}</td>
+            <td><strong>${rate}%</strong></td>
+            <td>
+              ${breach.exceeded
+                ? `<span class="alert-badge">⚠️ متجاوز للحد (${breach.maxInSingleWeek} في أسبوع)</span>`
+                : `<span style="color:var(--present-green); font-weight:700; font-size:0.76rem;">✓ منضبط</span>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Page 1: Excuses Log
+      renderPeriodExcusesList(activeStudents, recs);
+
+      // Page 2 (Landscape): Detailed Attendance Matrix
+      renderDetailedMatrix(activeStudents, scheduledDates, recs);
+    }
+
+    function renderDetailedMatrix(activeStudents, sessionDates, recs) {
+      const container = document.getElementById('detailedMatrixContainer');
+
+      if (sessionDates.length === 0) {
+        container.innerHTML = `
+          <p style="text-align:center; padding:14px; color:var(--text-secondary); font-size:0.84rem;">
+            لا توجد أيام انعقاد في هذه الفترة الزمنية.
+          </p>
+        `;
+        return;
+      }
+
+      if (sessionDates.length <= 35) {
+        const dateHeaders = sessionDates.map(dStr => {
+          const d = new Date(dStr + 'T12:00:00');
+          const dayShort = ARABIC_DAYS[d.getDay()];
+          const md = `${d.getDate()}/${d.getMonth() + 1}`;
+          return `<th><div style="font-size:0.65rem;">${dayShort}</div><div>${md}</div></th>`;
+        }).join('');
+
+        const rowsHtml = activeStudents.map((st, idx) => {
+          const breach = checkStudentWeeklyBreachInPeriod(st.id, recs);
+          const stRecs = recs.filter(r => r.student_id === st.id);
+          const p = stRecs.filter(r => r.status === 'PRESENT').length;
+          const e = stRecs.filter(r => r.status === 'EXCUSED').length;
+          const u = stRecs.filter(r => r.status === 'UNEXCUSED').length;
+
+          const cells = sessionDates.map(dStr => {
+            const sessId = 'sess_' + dStr;
+            const rec = recs.find(r => r.session_id === sessId && r.student_id === st.id);
+            if (!rec) return `<td style="color:var(--text-secondary)">—</td>`;
+            if (rec.status === 'PRESENT') return `<td class="cell-p">✓</td>`;
+            if (rec.status === 'EXCUSED') return `<td class="cell-e" title="${rec.excuse_reason || ''}">غ</td>`;
+            if (rec.status === 'UNEXCUSED') return `<td class="cell-u">✗</td>`;
+            return `<td>—</td>`;
+          }).join('');
+
+          return `
+            <tr class="${breach.exceeded ? 'exceeded-row' : ''}">
+              <td>${idx + 1}</td>
+              <td class="name-cell">
+                ${st.name}
+                ${breach.exceeded ? `<span class="alert-badge" style="margin-right:4px;">⚠️</span>` : ''}
+              </td>
+              ${cells}
+              <td class="cell-p">${p}</td>
+              <td class="cell-e">${e}</td>
+              <td class="cell-u">${u}</td>
+            </tr>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <table class="official-table">
+            <thead>
+              <tr>
+                <th style="width:26px">#</th>
+                <th style="text-align:right">اسم الطالب</th>
+                ${dateHeaders}
+                <th>✓</th>
+                <th>غ</th>
+                <th>✗</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        `;
+      } else {
+        // للتقرير السنوي الطويل: عرض مصفوفة الأشهر أفقياً
+        const monthsSet = new Set(sessionDates.map(d => d.slice(0, 7)));
+        const monthsList = Array.from(monthsSet).sort();
+
+        const monthHeaders = monthsList.map(m => `<th>${m}</th>`).join('');
+        const rowsHtml = activeStudents.map((st, idx) => {
+          const breach = checkStudentWeeklyBreachInPeriod(st.id, recs);
+          const cells = monthsList.map(m => {
+            const mRecs = recs.filter(r => r.student_id === st.id && r.session_id.replace('sess_', '').startsWith(m));
+            if (mRecs.length === 0) return `<td>—</td>`;
+            const p = mRecs.filter(r => r.status === 'PRESENT').length;
+            const e = mRecs.filter(r => r.status === 'EXCUSED').length;
+            const u = mRecs.filter(r => r.status === 'UNEXCUSED').length;
+            return `<td style="font-size:0.72rem;"><span class="cell-p">${p}✓</span> | <span class="cell-e">${e}غ</span> | <span class="cell-u">${u}✗</span></td>`;
+          }).join('');
+
+          return `
+            <tr class="${breach.exceeded ? 'exceeded-row' : ''}">
+              <td>${idx + 1}</td>
+              <td class="name-cell">${st.name} ${breach.exceeded ? '<span class="alert-badge">⚠️</span>' : ''}</td>
+              ${cells}
+            </tr>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <table class="official-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th style="text-align:right">اسم الطالب</th>
+                ${monthHeaders}
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        `;
+      }
+    }
+
+    function renderPeriodExcusesList(activeStudents, recs) {
+      const container = document.getElementById('periodExcusesContainer');
+      const excusedRecs = recs.filter(r => r.status === 'EXCUSED');
+
+      if (excusedRecs.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      const itemsHtml = excusedRecs.map(r => {
+        const st = activeStudents.find(s => s.id === r.student_id) || db.students.find(s => s.id === r.student_id);
+        const dateStr = r.session_id.replace('sess_', '');
+        return `<li><strong>${st ? st.name : ''}:</strong> غائب بعذر يوم (${dateStr}) — السبب: <strong>${r.excuse_reason || 'عذر مسجل'}</strong></li>`;
+      }).join('');
+
+      container.innerHTML = `
+        <div style="background:var(--bg-elevated); padding:10px 14px; border-radius:10px; border:1px solid var(--border-color); font-size:0.78rem;">
+          <strong style="color:var(--excused-amber); display:block; margin-bottom:5px;">📌 بيان تفصيلي بالأعذار المسجلة خلال الفترة:</strong>
+          <ul style="padding-right:18px; line-height:1.6;">${itemsHtml}</ul>
+        </div>
+      `;
+    }
+
+    function handlePrintOfficialReport() {
+      const { incompleteDays, hasFutureDays } = getReportRangeData();
+      if (hasFutureDays || incompleteDays.length > 0) {
+        alert('⚠️ لا يمكن طباعة التقرير قبل استكمال تحضير جميع الطلاب النشطين في كافة أيام الفترة المحددة.');
+        return;
+      }
+      window.print();
+    }
+
+    /* =========================================================
+       8. WHATSAPP SHARE & EXCEL/CSV EXPORT
+       ========================================================= */
+    function copyDailyWhatsApp() {
+      if (currentSelectedDate > getTodayISO()) return;
+      const d = new Date(currentSelectedDate + 'T12:00:00');
+      const dayName = ARABIC_DAYS[d.getDay()];
+      const sessId = 'sess_' + currentSelectedDate;
+      const activeStudents = db.students.filter(s => s.is_active);
+      const weeklyLimit = db.settings.weekly_absence_limit || 2;
+
+      const missingToday = activeStudents.filter(st => !db.records.some(r => r.session_id === sessId && r.student_id === st.id));
+      if (missingToday.length > 0) {
+        const proceed = confirm(`⚠️ تنبيه: يوجد (${missingToday.length}) طالب لم يتم تحضيرهم في هذا اليوم بعد.\nهل تريد نسخ التقرير على الرغم من ذلك؟`);
+        if (!proceed) return;
+      }
+
+      let p = 0, e = 0, u = 0;
+      const lines = activeStudents.map((st, idx) => {
+        const rec = db.records.find(r => r.session_id === sessId && r.student_id === st.id);
+        const weeklyU = getStudentWeeklyUnexcusedCount(st.id, currentSelectedDate);
+        const warn = weeklyU >= weeklyLimit ? ` ⚠️(تجاوز حد الأسبوع: ${weeklyU})` : '';
+        let symbol = '⏳ لم يُحضّر';
+        if (rec) {
+          if (rec.status === 'PRESENT') { symbol = '✓ حاضر'; p++; }
+          if (rec.status === 'EXCUSED') { symbol = `غ بعذر (${rec.excuse_reason || 'مسجل'})`; e++; }
+          if (rec.status === 'UNEXCUSED') { symbol = '✗ غائب بدون عذر'; u++; }
+        }
+        return `${idx + 1}. ${st.name}: [ ${symbol} ]${warn}`;
+      });
+
+      const msg = [
+        `🌅 *تقرير تحضير: ${db.settings.circle_name}*`,
+        `📅 اليوم: ${dayName} (${currentSelectedDate})`,
+        `👤 المشرف: ${db.settings.supervisor_name}`,
+        `──────────────────`,
+        ...lines,
+        `──────────────────`,
+        `📊 *الملخص:* الإجمالي: ${activeStudents.length} | حضور (✓): ${p} | بعذر (غ): ${e} | غياب (✗): ${u}`
+      ].join('\n');
+
+      navigator.clipboard.writeText(msg).then(() => {
+        alert('✅ تم نسخ التقرير اليومي المنسق! يمكنك الآن لصقه مباشرة في مجموعة الواتساب.');
+      }).catch(() => {
+        prompt('انسخ النص التالي:', msg);
+      });
+    }
+
+    function exportCSV() {
+      const { startISO, endISO, recs, incompleteDays, hasFutureDays } = getReportRangeData();
+      if (hasFutureDays || incompleteDays.length > 0) {
+        alert('⚠️ يجب استكمال تحضير جميع أيام الفترة أولاً قبل تصدير ملف التقرير.');
+        return;
+      }
+
+      const rows = [
+        ['الاسم الرباعي', 'الحالة', 'حاضر (✓)', 'غائب بعذر (غ)', 'غائب بدون عذر (✗)', 'نسبة الالتزام %', 'حالة الحد الأسبوعي', 'ملاحظات']
+      ];
+
+      db.students.forEach(st => {
+        const stRecs = recs.filter(r => r.student_id === st.id);
+        const p = stRecs.filter(r => r.status === 'PRESENT').length;
+        const e = stRecs.filter(r => r.status === 'EXCUSED').length;
+        const u = stRecs.filter(r => r.status === 'UNEXCUSED').length;
+        const rate = stRecs.length ? Math.round((p / stRecs.length) * 100) : 100;
+        const breach = checkStudentWeeklyBreachInPeriod(st.id, recs);
+
+        rows.push([
+          `"${st.name}"`,
+          st.is_active ? 'نشط' : 'مؤرشف',
+          p, e, u, `${rate}%`,
+          breach.exceeded ? `"متجاوز (${breach.maxInSingleWeek} في أسبوع)"` : 'منضبط',
+          `"${st.notes || ''}"`
+        ]);
+      });
+
+      const csvContent = '\uFEFF' + rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `تقرير_حلقة_الفجر_${startISO}_إلى_${endISO}.csv`;
+      a.click();
+    }
+
+    /* =========================================================
+       9. SETTINGS & BACKUP / RESTORE
+       ========================================================= */
+    function initSettingsView() {
+      document.getElementById('setCircleName').value = db.settings.circle_name;
+      document.getElementById('setSupervisor').value = db.settings.supervisor_name;
+      document.getElementById('setYear').value = db.settings.current_year;
+      document.getElementById('setTrackingStartDate').value = db.settings.tracking_start_date || shiftISO(getTodayISO(), -6);
+      document.getElementById('setAbsenceLimit').value = db.settings.weekly_absence_limit || 2;
+
+      const grid = document.getElementById('weekdaysSelector');
+      grid.innerHTML = ARABIC_DAYS.map((name, idx) => {
+        const isChecked = db.settings.active_days.includes(idx);
+        return `
+          <div class="day-check ${isChecked ? 'checked' : ''}" onclick="toggleWeekday(${idx}, this)" data-day="${idx}">
+            ${name}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleWeekday(dayIdx, el) {
+      el.classList.toggle('checked');
+    }
+
+    function saveSettings() {
+      const checkedEls = document.querySelectorAll('#weekdaysSelector .day-check.checked');
+      const selectedDays = Array.from(checkedEls).map(el => parseInt(el.getAttribute('data-day'), 10));
+
+      if (selectedDays.length === 0) {
+        return alert('يرجى اختيار يوم واحد على الأقل لانعقاد الحلقة');
+      }
+
+      db.settings.circle_name = document.getElementById('setCircleName').value.trim() || 'حلقة ما بعد الفجر';
+      db.settings.supervisor_name = document.getElementById('setSupervisor').value.trim() || 'مشرف الحلقة';
+      db.settings.current_year = document.getElementById('setYear').value.trim() || '1448 هـ';
+      db.settings.tracking_start_date = document.getElementById('setTrackingStartDate').value || shiftISO(getTodayISO(), -6);
+      db.settings.weekly_absence_limit = parseInt(document.getElementById('setAbsenceLimit').value, 10) || 2;
+      db.settings.active_days = selectedDays;
+
+      saveDB();
+      initAttendanceView();
+      alert('✅ تم حفظ إعدادات الحلقة بنجاح');
+    }
+
+    function exportBackupJSON() {
+      const dataStr = JSON.stringify(db, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `نسخة_احتياطية_حلقة_الفجر_${getTodayISO()}.json`;
+      a.click();
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported.students || !imported.records) {
+            return alert('❌ ملف النسخة الاحتياطية غير صالح');
+          }
+          db = imported;
+          saveDB();
+          initAttendanceView();
+          renderStudentsList();
+          renderReports();
+          initSettingsView();
+          alert('✅ تمت استعادة النسخة الاحتياطية وجميع سجلات السنة بنجاح!');
+        } catch (err) {
+          alert('❌ تعذر قراءة الملف');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* =========================================================
+       10. NAVIGATION CONTROLLER
+       ========================================================= */
+    function switchTab(tabName, btnEl) {
+      document.querySelectorAll('.tab-view').forEach(s => s.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      document.getElementById('dailySummaryStrip').style.display = (tabName === 'attendance') ? 'flex' : 'none';
+
+      if (tabName === 'attendance') initAttendanceView();
+      if (tabName === 'students') renderStudentsList();
+      if (tabName === 'reports') setReportPeriod(currentReportPeriod);
+      if (tabName === 'settings') initSettingsView();
+    }
+
+    // Boot Application
+    window.addEventListener('DOMContentLoaded', () => {
+      setupPWA();
+      loadDB();
+      initAttendanceView();
+      initSettingsView();
+    });
+  </script>
+</body>
+</html>
